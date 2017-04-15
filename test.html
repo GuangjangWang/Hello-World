@@ -1,0 +1,666 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+
+<html>
+    <head>
+        <title>期中考试 - WebplusPro 搜索</title>
+            <meta name="viewport" content="width=device-width,user-scalable=0,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+            <link rel="stylesheet" type="text/css"  href="../../_js/themes/default/easyui.css" />
+            <link rel="stylesheet" type="text/css" href="../../_js/themes/icon.css" />
+            <link rel="stylesheet" type="text/css" href="../../_css/search/wp_search.css" />
+            <link rel="stylesheet" type="text/css" href="../../_css/search/wp_search.js" />
+        
+        <link rel="stylesheet" type="text/css" href="/_upload/tpl/00/32/50/template50/css/custom/wp_search.css" >
+        
+        <script type="text/javascript" src="../../_js/jquery.min.js"></script>
+        <script type="text/javascript" src="../../_js/jquery.easyui.min.js"></script>
+        <script type="text/javascript" src="../../_js/jquery.query.js"></script>
+        <script type="text/javascript" src="../../_js/easyui-lang-zh_CN.js"></script>
+        <script type="text/javascript" src="../../_js/search/wp_search.js"></script>
+        <style type="text/css">
+        .wp_search .result_item .item_summary {
+			    color: #333333;
+			    font-size: 13px;
+			    line-height: 1.54;
+			    word-break: break-all;
+			}
+			.wp_search .result_item .item_metas {
+			    font-size: 13px;
+			    line-height: 1.54;
+			}
+			.wp_search .result_item .item_metas span {
+   				 color: #1b9350;
+			}
+        </style>
+
+
+        <script type="text/javascript">
+          /*  function doSearch() {
+                var isOpenSearchCheckBox = '0';
+                if (isOpenSearchCheckBox === '1') {
+                    var boxes = '';
+                    var isExist = false;
+                    $(":checkbox[name=showField1]:checked").each(function() {
+                        boxes += ',' + $(this).val();
+                        isExist = true;
+                    });
+                    boxes = boxes.substring(1);
+                    $("#showField").val(boxes);
+                    if (!isExist) {
+                        $.messager.alert("提示", "请至少选择一个搜索范围！", "info");
+                        return;
+                    }
+                }
+                $("#pageIndex").val(1);
+                initSearchParam();
+                $("#fm").submit();
+            }
+
+            function doSearchByType(type) {
+                $("#pageIndex").val(1);
+                $("#searchType").val(type);
+                initSearchParam();
+                $("#fm").submit();
+            }
+
+            function doSearchByPageIndex(pageIndex) {
+                $("#pageIndex").val(pageIndex);
+                initSearchParam();
+                $("#fm").submit();
+            }*/
+
+            $().ready(function() {
+
+                gotop();
+
+                $(".search_switch").attr("title", function() {
+                    return "展开";
+                });
+                if (false) {
+                    $(".search_switch").addClass('close_switch').trigger("click");
+                    $(".search_switch").attr("title", function() {
+                        return "收缩";
+                    });
+                }
+                var type = $("#searchType").val();
+                if (type === '') {
+                    $('#i_all').addClass('kls');
+                } else {
+                    $('#i_' + type).addClass('kls');
+                }
+                if (false) {
+                    initOrg();
+                    initFolder();
+                }
+
+                var orType = $('#orderType').val();
+                if (orType === 'publishTime') {
+                    $('#order_default').removeClass("curr");
+                    $('#order_publishTime').addClass("curr");
+                    var orTip = $("#orderTip").val();
+                    if (orTip === '' || orTip === '0') {
+                        $('.filter .f-sort a i').css('background', 'url(images/search.png) no-repeat 3px -225px');
+                    } else {
+                        $('.filter .f-sort a i').css('background', 'url(images/search.png) no-repeat 3px -203px');
+                    }
+                } else {
+                    $('#order_publishTime').removeClass("curr");
+                    $('#order_default').addClass("curr");
+                    $('.filter .f-sort a i').css('background', 'url(images/search.png) no-repeat -50px -25px');
+                }
+
+                initCategory();
+                var isOpenSearchCheckBox = '0';
+                var fields = 'title,content,keyword,attachment,'.substring(0, 'title,content,keyword,attachment,'.length - 1).split(",");
+                if (isOpenSearchCheckBox === '1') {
+                    for (i = 0; i < fields.length; i++) {
+                        $("#show" + fields[i]).attr("checked", true);
+                    }
+                }
+                initColumn();
+            });
+
+            function gotop() {
+                var $gotop = $("#gotop");
+
+                $(".back-top", $gotop).click(function(event) {
+                    /* Act on the event */
+                    event.preventDefault();
+                    $("html,body").stop().animate({scrollTop: 0}, 700);
+                });
+
+                $(window).scroll(function(event) {
+                    var windHeight = $(window).height();
+                    var scrolltop = $(window).scrollTop();
+                    var height = $gotop.outerHeight();
+                    var top = windHeight + scrolltop - 50 - height;
+
+                    if (scrolltop > 260) {
+                        $gotop.stop().show().animate({top: top}, 300);
+                    } else {
+                        $gotop.stop().hide();
+                    }
+                });
+
+            }
+
+            function initOrg() {
+                $('#org').combotree({
+                    url: 'loadOrgTree.do?_p=YXM9MjkmdD01MCZkPTE0NiZwPTEmbT1TTiY_',
+                    checkbox: false,
+                    cascadeCheck: false,
+                    onSelect: function(node) {
+                        $('#orgs').val(node.text);
+                        $('#orgIds').val(node.id);
+                    },
+                    onLoadSuccess: function() {
+                        if ('' !== '') {
+                            $('#org').combotree("setValue", '');
+                        }
+                    }
+                });
+            }
+
+            function initColumn() {
+                $('#columnTree').combotree({
+                    url: 'loadColumnTree.do?_p=YXM9MjkmdD01MCZkPTE0NiZwPTEmbT1TTiY_',
+                    checkbox: false,
+                    cascadeCheck: false,
+                    editable: false,
+                    width: 164,
+                    panelHeight: 200,
+                    onSelect: function(node) {
+                        $('#columns').val(node.text);
+                        $('#columnIds').val(node.id);
+                    },
+                    onLoadSuccess: function() {
+                        if ('' !== '') {
+                            $('#columnTree').combotree("setValue", '');
+                        }
+                    }
+                });
+            }
+
+            function initCategory() {
+                $('#catalogTree').combotree({
+                    url: 'loadCategoryTree.do?_p=YXM9MjkmdD01MCZkPTE0NiZwPTEmbT1TTiY_',
+                    checkbox: true,
+                    cascadeCheck: true,
+                    multiple: true,
+                    animate: true,
+                    //onlyLeafCheck:true,
+                    onCheck: function(node) {
+                        var catalogs = [];
+                        var trees = $('#catalogTree').combotree('tree'); // 得到树对象  
+                        var nodes = trees.tree('getChecked');
+                        if (nodes[0].id === 0) {
+                            $('#catalog').val("0");
+                            return"";
+                        }
+                        for (var i = 0; i < nodes.length; i++) {
+                            catalogs.push(nodes[i].id);
+                        }
+                        if (catalogs !== null) {
+                            $('#catalog').val(catalogs.join(","));
+                        }
+
+                    },
+                    onLoadSuccess: function() {
+                        if ('' !== '') {
+                            var catalogs = [];
+                            var catalogs = '';
+                            catalogs = catalogs.split(",");
+                            $('#catalogTree').combotree("setValues", catalogs);
+                        } else {
+                            $('#catalogTree').combotree("setValue", "0");
+                        }
+                    }
+                });
+            }
+
+            function initFolder() {
+                $('#folder').combotree({
+                    url: 'loadPublicInfoFolderTree.do?_p=YXM9MjkmdD01MCZkPTE0NiZwPTEmbT1TTiY_',
+                    checkbox: false,
+                    cascadeCheck: false,
+                    onSelect: function(node) {
+                        $('#folders').val(node.text);
+                        $('#folderIds').val(node.id);
+                    },
+                    onLoadSuccess: function() {
+                        if ('' !== '') {
+                            $('#folder').combotree("setValue", '');
+                        }
+                    }
+                });
+            }
+
+            function initSearchParam() {
+                $("#orgCode").val($("#code").val());
+                $('#infoCode').val($('#artCode').val());
+                $("#creator").val($("#vcreator").val());
+                $("#author").val($("#vauthor").val());
+                $("#source").val($("#vsource").val());
+                $("#beginTime").val($("#vbeginTime").datebox('getValue'));
+                $("#endTime").val($("#vendTime").datebox('getValue'));
+
+            
+            }
+
+            function searchTypeChange(value) {
+                $('#searchFilter').val(value);
+            }
+
+            function searchOrder(value) {
+                if (value === 1) {
+                    $('#order_publishTime').removeClass("curr");
+                    $('#order_default').addClass("curr");
+                    $("#orderTip").val('');
+                    $("#orderType").val('');
+                } else {
+                    $("#orderType").val('publishTime');
+                    var orTip = $("#orderTip").val();
+                    if (orTip === '' || orTip === '0') {
+                        $("#orderTip").val("1");
+                        $('.filter .f-sort a i').css('background', 'url(images/search.png) no-repeat 3px -203px');
+                    } else {
+                        $("#orderTip").val("0");
+                        $('.filter .f-sort a i').css('background', 'url(images/search.png) no-repeat 3px -225px');
+                    }
+                    $('#order_default').removeClass("curr");
+                    $('#order_publishTime').addClass("curr");
+                }
+                doSearch();
+            }
+
+            function relateBaidu() {
+                var type = $("#searchType").val();
+                var inputword = document.getElementById("keyword").value;
+                var url = "https://www.baidu.com/s?wd=";
+                if (type === 'image') {
+                    url = "http://image.baidu.com/search/index?tn=baiduimage&cl=2&word=";
+                }
+                url += inputword;
+                window.open(url);
+            }
+
+            function setColumn() {
+                if ($('#columnPathCK').attr('checked')) {
+                    $('#columnPath').val(true);
+                } else {
+                    $('#columnPath').val(false);
+                }
+            }
+
+
+
+        </script>
+        <style>
+            .result_bar{ width:auto; height:36px; border:1px solid #e0e0e0;}
+            .result_bar_content{ padding:8px 14px;}
+            .result_bar_content p{ float:left;}
+            .result_bar_content .xs{ float:right;}
+            .result_bar_content .xs li{ float:left;}
+            .bianju5{ margin-top:5px;}
+            .s_mod_order_cate,.s_mod_order_arrow,.s_mod_order_slist,.s_mod_order_spic{background-image:url(../../_css/search2/imgs/bg_search_sort.png);background-repeat:no-repeat}
+            .s_mod_order_item{float:left;margin-right:10px;position:relative}
+            .s_mod_order_tit{float:left;}
+            .s_mod_order_term{float:left;margin-top:2px;_margin-top:0px;padding-left: 10px;}
+            .s_mod_order_cate{background-repeat:repeat-x;background-position:0 -20px;float:left;height:17px;line-height:17px;padding:0 5px;border:1px solid #cdcdcd;margin-right:3px;_padding-top:3px;_height:13px}
+            .s_mod_order_cate_on,.s_mod_order_cate:hover{border:1px solid #ffd18b;background-position:-0px -0px;text-decoration:none;color:#333}
+            .s_mod_order_cate_default{padding:0 12px;_padding-top:1px}
+            .s_mod_order_arrow{display:inline-block;width:11px;height:11px;vertical-align:middle;margin-right:3px;background-position:-24px -55px}
+            .s_mod_order_arrow_desc{background-position:-0px -55px}
+            .s_mod_order_cate_on .s_mod_order_arrow{background-position:-12px -55px}
+            .s_mod_order_cate_on .s_mod_order_arrow_desc{background-position:-36px -55px}
+            .curr{text-decoration:none;background: #5CACEE;color: #FFF;border-color: #5CACEE;height: 23px;float: left;padding: 0 10px;}
+            .check{text-decoration:none;background: #FFF;border: 1px solid #CCC;color: #333;height: 23px;float: left;padding: 0 10px;}
+            .checkboxli{padding-left: 575px;list-style-type:none;margin-top:-18px;margin-left: -25px;}
+            #gotop {width: 60px; background: #d4dce8; position: absolute; left: 50%; top: 0px; margin-left: 545px; z-index:999;display: none;}
+            #gotop a {display: block;width: 60px;height: 61px;background:url(images/gotop_03.jpg) no-repeat 50% 0;cursor: pointer;}
+            #gotop a.back-top:hover {opacity: 0.8; filter: alpha(opacity=80); cursor: pointer;}
+            .wp_search{width:100%;height:100%; position:relative;}
+        </style>
+        <style>
+            
+            .filter .f-sort a {
+                float: left;
+                padding: 0 10px;
+                height: 23px;
+                width:60px;
+                border: 1px solid #CCC;
+                line-height: 23px;
+                margin-right: -1px;
+                background: #FFF;
+                color: #333;
+            }
+            
+            .filter .f-sort a:hover {
+                text-decoration: none;
+                border-color: #5CACEE;
+                color: #5CACEE;
+            }
+
+            .filter .f-sort a i {
+                position: absolute;
+                background: url(images/search.png) no-repeat 3px -203px;
+                top: 6px;
+                right: 1px;
+                width: 17px;
+                height: 12px;
+                overflow: hidden;
+                font-size: 0;
+            }
+
+
+            .filter .f-sort a.up i {
+                background-position: 0 -225px;
+            }
+
+            .filter .f-sort a.curr {
+                background: #5CACEE;
+                color: #FFF;
+                border-color: #5CACEE;
+            }
+            .filter .f-sort a.curr:hover {
+                color: #fff;
+            }
+
+            .filter .f-sort a .up {
+                position: relative;
+                padding-right: 20px;
+            }
+            .filter .f-sort a.down, .filter .f-sort a.up {
+                position: relative;
+                padding-right: 20px;
+            }
+
+            .filter .f-sort a.down i, .filter .f-sort a.up i {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+            
+            <div id="search_body" class="search_body">
+                <div class="search_results">
+                    <div class="results_list">
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/1d/f6/c887a73206/page.htm" target="_blank"><div title= '关于2016/2017学年第二学期期中考试工作安排的通知'>关于2016/2017学年第二学期<font color=#DD4B39>期中考试</font>工作安排的通知</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">各院部系：为加强<font color=#DD4B39>期中考试</font>的管理，确保考试有序进行，现就2016/2017学年第二学期<font color=#DD4B39>期中考试</font>有关事项通知如下：一、考试科目及时间1．考试科目：本学期需<font color=#DD4B39>期中考试</font>的课程见附件《2016/2017学年第二学期<font color=#DD4B39>期中考试</font>课程》。2．考试时间：由教务处统一安排考试的课程详见附件《2016-2017学年第二学期<font color=#DD4B39>期中考试</font>日程安排》,未做统一安排的课程由任课教师自行安排考试。二、考试对象1．所有本科和高职学生。2．重修学生不参加<font color=#DD4B39>期中考试</font>。三、考试的目的与方式<font color=#DD4B39>期中考试</font>是加强课程教学过程性评价的措施之一，是对学生阶段性学习情况的检查与总结，对所学知识的复习巩固和加深，目的在于督促学生学习，通过<font color=#DD4B39>期中考试</font>检验前半学期的学习成果，发现平常学习中存在的问题和学习方法的不足之处，以便及时进行自我反思、分析，在之后的学习中有的放矢的做出努力。任课教师可以根据<font color=#DD4B39>期中考试</font>的目的和课程的性质，采取灵活多样考试方式，如开卷、闭卷、写小论文、调查报告、设计性作业等，具体考试方式由教研室确定，达到科学合理检测出学生真实学习状况的目的即可。四、试卷保存与成绩记载1．<font color=#DD4B39>期中考试</font>课程的试卷、签到表、成绩等考试相关资料由教研室保存。2．期中考</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">殷晓永</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2017-04-07 09:33</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：考试管理</span>
+                                        
+                                        <span class="meta_time">出处：教务处</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/26/8e/33f5433145f1852b2d4239a6b18a/aa20924c-5aa1-4d48-b29c-41697ea2a16d.xls" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/_upload/article/files/13/2d/158616d6401181ad25800e7d9720/7187ba9a-de70-43f8-8974-33fb2fc60119.xls" target="_blank"><div title= '期中考试请假单'><font color=#DD4B39>期中考试</font>请假单</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary"><font color=#DD4B39>期中考试</font>请假单.xls</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">jwkllf</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2017-04-06 11:07</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：考试管理</span>
+                                        
+                                        <span class="meta_time">出处：教务处</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/13/2d/158616d6401181ad25800e7d9720/7187ba9a-de70-43f8-8974-33fb2fc60119.xls" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/30/a4/c884a12452/page.htm" target="_blank"><div title= '2016-2017学年第一学期期中考试安排'>2016-2017学年第一学期<font color=#DD4B39>期中考试</font>安排</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">2016-2017学年第一学期<font color=#DD4B39>期中考试</font>安排.rar</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">韦娟</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2016-10-27 10:06</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：课程管理</span>
+                                        
+                                        <span class="meta_time">出处：</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/fb/8d/7fd3731446519153bc50b18f1d8b/ec1c26db-8a54-4a72-bfd1-c44df47ac203.rar" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/23/eb/c887a9195/page.htm" target="_blank"><div title= '2015-2016学年第二学期期中考试安排'>2015-2016学年第二学期<font color=#DD4B39>期中考试</font>安排</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">                        2015-2016学年第二学期<font color=#DD4B39>期中考试</font>安排（见附件）</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">系统管理员</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2016-03-25 00:00</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：考试管理</span>
+                                        
+                                        <span class="meta_time">出处：</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/72/ae/481590c049adb71a274fca729a5e/7508c745-6c73-401f-aba2-9f7dc4286d88.rar" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/23/c8/c865a9160/page.htm" target="_blank"><div title= '2015-2016学年第二学期期中考试安排'>2015-2016学年第二学期<font color=#DD4B39>期中考试</font>安排</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">                        2015-2016学年第二学期<font color=#DD4B39>期中考试</font>安排（见附表）</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">系统管理员</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2016-03-25 00:00</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：课表查询</span>
+                                        
+                                        <span class="meta_time">出处：</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/12/c1/f4b56af14efaaf9920d770be1f42/d588cc6e-b49c-4822-ba74-fc1207f7d829.rar" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/25/e7/c931a9703/page.htm" target="_blank"><div title= '期中考试请假审批单'><font color=#DD4B39>期中考试</font>请假审批单</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">                 【文件名称】：                <font color=#DD4B39>期中考试</font>请假审批单 </p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">系统管理员</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2013-04-25 00:00</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：考试管理</span>
+                                        
+                                        <span class="meta_time">出处：</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                            <span class="meta_column"><a href="/_upload/article/files/21/3a/75fc861946359b6d0521293d8b7a/0534d49c-456d-41c1-bc03-fa3ecbbcdc6e.xls" >相关附件</a></span>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="result_item clearfix">
+                                
+                                <h3 class="item_title">
+                                    <a href="http://jwc.cpu.edu.cn/27/ef/c855a10223/page.htm" target="_blank"><div title= '期中考试成绩'><font color=#DD4B39>期中考试</font>成绩</div></a>
+                                </h3>
+                                
+                                
+                                
+                                <div>
+                                    
+                                    <p class="item_summary">                 【问题描述】：                老师请问一下，期中考</p>
+                                    
+                                    <div class="item_metas">
+                                        
+                                        <span class="meta_creator">系统管理员</span>
+                                        - 
+                                        
+                                        <span class="meta_time">发布时间：2011-05-08 00:00</span>
+                                        - 
+                                        
+                                        <span class="meta_column">目录：教学问答</span>
+                                        
+                                        <span class="meta_time">出处：</span>
+                                        -
+                                        
+
+                                        
+                                        <br/>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                </div>
+                <div class="search_pages clearfix">
+                    
+                    <span class="items_num">为您找到相关结果约7个（耗时约0.073秒）</span>
+                </div>
+            </div>
+            <div id="gotop" > <a class="back-top"></a> </div>
+        </div>
+    </body>
+</html>
+
+
